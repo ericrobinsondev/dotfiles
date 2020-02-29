@@ -49,7 +49,7 @@ set foldlevel=99
 nnoremap <space> za
 
 " Switch to NERDTree hierarchy in normal or insert mode
-map <silent> <C-n> :NERDTreeFocus<CR>
+map <silent> <C-n> :NERDTreeToggle<CR>
 
 " Move text with Alt+j/k
 nnoremap ∆ :m .+1<CR>==
@@ -118,6 +118,9 @@ Plug 'nvie/vim-flake8'
 
 " Fuzzy Finder
 Plug 'junegunn/fzf'
+
+" Vimux - interact with tmux from vim
+Plug 'benmills/vimux'
 
 " vim-polyglot plugin
 Plug 'sheerun/vim-polyglot'
