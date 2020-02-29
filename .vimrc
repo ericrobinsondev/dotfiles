@@ -4,6 +4,16 @@ syntax enable
 " term guicolors for dracula
 set termguicolors
 
+" change : for ,
+let mapleader = ","
+
+" quickly clear highlights
+map <leader>n :noh<CR>
+
+" reload files when they change on disk (e.g., git checkout)
+set autoread
+
+
 " ================================================
 " SECTION: TABS, SPACES, and FOLDING 
 " ================================================
@@ -16,8 +26,17 @@ au BufNewFile,BufRead *.py
     \ set shiftwidth=4
     \ set textwidth=79
     \ set expandtab
-    \ set autoindent
     \ set fileformat=unix
+
+" the same indent as the line you're currently on. Useful for READMEs, etc.
+set autoindent
+
+" Allow backspacing over autoindent, line breaks and start of insert action
+set backspace=indent,eol,start
+
+" Instead of failing a command because of unsaved changes, instead raise a
+" dialogue asking if you wish to save changed files.
+set confirm
 
 " Flag unnecessary whitespace
 au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
@@ -67,8 +86,11 @@ nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
-" jk is escape
-inoremap jk <esc>
+" no more pesky escape (for insert and visual mode)
+imap jk  <Esc>
+imap jK <Esc>
+imap Jk <Esc>
+imap JK <Esc> 
 
 " show line numbers, relative when has focus, absolute otherwise
 " Use TAB and Shift-TAB to navigate completion list
@@ -106,6 +128,9 @@ set incsearch
 " highlight search matches
 set hlsearch
 
+" case-sensitive search if any caps
+set smartcase
+
 
 " ================================================
 " SECTION: PLUGINS 
@@ -121,6 +146,15 @@ Plug 'junegunn/fzf'
 
 " Vimux - interact with tmux from vim
 Plug 'benmills/vimux'
+
+" Navigate tmux/vim windows easily
+Plug 'christoomey/vim-tmux-navigator'
+
+" Syntax highlighting when editing .tmux files
+Plug 'tmux-plugins/vim-tmux' 
+
+" vim chords
+Plug 'kana/vim-arpeggio'
 
 " vim-polyglot plugin
 Plug 'sheerun/vim-polyglot'
@@ -214,11 +248,46 @@ Plug 'michaeljsmith/vim-indent-object'
 " Initialize plugin system
 call plug#end()
 
+" Attempt to determine the type of a file based on its name and possibly its
+" contents. Use this to allow intelligent auto-indenting for each filetype,
+" and for plugins that are filetype specific.
+filetype indent plugin on
+
 " set color scheme
 colorscheme dracula
 
 " Close the completion window when completion is done
 autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
+
+" ================================================
+" SECTION: VIMUX commands 
+" ================================================
+" Prompt for a command to run
+map <Leader>vp :VimuxPromptCommand<CR>
+
+" Run last command executed by VimuxRunCommand
+map <Leader>vl :VimuxRunLastCommand<CR>
+
+" Inspect runner pane
+map <Leader>vi :VimuxInspectRunner<CR>
+
+" Close vim tmux runner opened by VimuxRunCommand
+map <Leader>vq :VimuxCloseRunner<CR>
+
+" Open vimux pane
+map <Leader>vo :VimuxOpenPane<CR>
+
+" Interrupt any command running in the runner pane
+map <Leader>vx :VimuxInterruptRunner<CR>
+"
+" Function to make tmux zoom its runner pane.
+function! VimuxZoomRunner()
+  call VimuxInspectRunner()
+  call system("tmux resize-pane -Z")
+endfunction
+
+" Zoom the runner pane (use <bind-key> z to restore runner pane)
+map <Leader>vz :call VimuxZoomRunner()<CR>
 
 " ================================================
 " SECTION: NERDtree 
@@ -254,3 +323,11 @@ let NERDTreeDirArrows = 1
 
 " Automatically delete buffer of file deleted in NERDTree
 let NERDTreeAutoDeleteBuffer = 1
+
+" ================================================
+" SECTION: CHORDS 
+" ================================================
+call arpeggio#map('n', '', 0, 'vl', ':VimuxRunLastCommand<CR>')
+call arpeggio#map('n', '', 0, 'vp', ':VimuxPromptCommand<CR>')
+call arpeggio#map('n', '', 0, 'vq', ':VimuxCloseRunner<CR>')
+call arpeggio#map('n', '', 0, 'pr', 'VimuxRunCommand("clear; pr<CR>')
