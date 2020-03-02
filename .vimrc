@@ -13,6 +13,12 @@ map <leader>n :noh<CR>
 " reload files when they change on disk (e.g., git checkout)
 set autoread
 
+" shortcut to save
+nmap <leader>, :w<cr>
+
+" scroll the viewport faster
+nnoremap <C-e> 3<C-e>
+nnoremap <C-y> 3<C-y>
 
 " ================================================
 " SECTION: TABS, SPACES, and FOLDING 
@@ -137,6 +143,9 @@ set smartcase
 " ================================================
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
+
+" Fancy start screen for vim 
+Plug 'mhinz/vim-startify'
 
 " PEP8 Checking
 Plug 'nvie/vim-flake8'
