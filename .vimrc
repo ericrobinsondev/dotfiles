@@ -4,49 +4,57 @@ syntax enable
 " term guicolors for dracula
 set termguicolors
 
+" Autoread changes to files
+set autoread
+
+" Case sensitivity
+set ignorecase
+set smartcase
 " ================================================
 " SECTION: TABS, SPACES, and FOLDING 
 " ================================================
 " number of visual spaces per TAB
 set tabstop=4
+set softtabstop=4
+set expandtab
+
 " Python
 au BufNewFile,BufRead *.py
-    \ set tabstop=4
-    \ set softtabstop=4
-    \ set shiftwidth=4
-    \ set textwidth=79
-    \ set expandtab
-    \ set autoindent
-    \ set fileformat=unix
-
-" Flag unnecessary whitespace
-au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+    \| set tabstop=4
+    \| set softtabstop=4
+    \| set shiftwidth=4
+    \| set textwidth=79
+    \| set expandtab
+    \| set autoindent
+    \| set fileformat=unix
 
 " Make python code look pretty
-let python_highlight_all=1
-syntax on
+" let python_highlight_all=1
 
 " Ignore .pyc files in NERDtree
 let NERDTreeIgnore=['\.pyc$', '\~$']
-
-"Frontend TABS
-au BufNewFile,BufRead *.js, *.html, *.css
-    \ set tabstop=2
-    \ set softtabstop=2
-    \ set shiftwidth=2
 
 " Set encoding
 set encoding=utf-8
 
 " Code Folding
 set foldmethod=indent
-set foldlevel=99
+set foldlevel=1
 
 " ================================================
 " SECTION: Remapping keys
 " ================================================
 " Enable folding with spacebar 
-nnoremap <space> za
+nnoremap <expr> <space> foldclosed('.') != -1 ? 'zO' : 'zc'
+
+" Do not use arrows in Normal mode
+noremap <silent> <Up>    <Nop>
+noremap <silent> <Down>  <Nop>
+noremap <silent> <Left>  <Nop>
+noremap <silent> <Right> <Nop>
+
+" fzf files shortcut
+nnoremap <silent> <C-p> :Files<CR>
 
 " Switch to NERDTree hierarchy in normal or insert mode
 map <silent> <C-n> :NERDTreeFocus<CR>
@@ -69,6 +77,12 @@ nnoremap <C-H> <C-W><C-H>
 
 " jk is escape
 inoremap jk <esc>
+" in terminal mode as well
+tnoremap jk <C-\><C-n> 
+
+" Open new splits to the right or below
+set splitright
+set splitbelow
 
 " show line numbers, relative when has focus, absolute otherwise
 " Use TAB and Shift-TAB to navigate completion list
@@ -113,23 +127,27 @@ set hlsearch
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 
-" PEP8 Checking
+"" PEP8 Checking
 Plug 'nvie/vim-flake8'
 
 " Fuzzy Finder
-Plug 'junegunn/fzf'
-
-" vim-polyglot plugin
-Plug 'sheerun/vim-polyglot'
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --no-bash' }
+Plug 'junegunn/fzf.vim'
 
 " dracula color theme
 Plug 'dracula/vim', { 'as': 'dracula' }
 
-" ale for linting
-Plug 'dense-analysis/ale'
+" Fuzzy most recently used files
+Plug 'pbogut/fzf-mru.vim'
+
+" vim-polyglot plugin
+Plug 'sheerun/vim-polyglot'
 
 " code completion
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+" Gutentags for cTag generation
+Plug 'ludovicchabant/vim-gutentags'
 
 " commentary
 Plug 'tpope/vim-commentary'
@@ -143,8 +161,14 @@ Plug 'tpope/vim-fugitive'
 " Better folding
 Plug 'tmhedberg/SimpylFold'
 
+" Fast Fold
+Plug 'konfekt/FastFold'
+
 " NERDtree file tree explorer
 Plug 'scrooloose/nerdtree'
+
+" Kill buffer without closing split
+Plug 'qpkorr/vim-bufkill'
 
 " Airline status bar
 Plug 'vim-airline/vim-airline'
@@ -158,8 +182,8 @@ Plug 'prettier/vim-prettier', {
   \ 'do': 'yarn install',
   \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'yaml', 'html'] }
 " Prettier format on save
-let g:prettier#autoformat = 0
-autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue PrettierAsync
+" let g:prettier#autoformat = 0
+" autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue PrettierAsync
 
 if !exists('g:airline_symbols')
     let g:airline_symbols = {}
@@ -191,7 +215,12 @@ let g:airline_symbols.linenr = ''
 " Auto-lint on save
 let g:ale_fixers = {}
 let g:ale_fixers['javascript'] = ['eslint']
+let g:ale_fixers['python'] = ['black']
 let g:ale_fix_on_save = 1
+let g:ale_linters = {}
+let g:ale_linters['python'] = ['flake8']
+" Only run linters named in ale_linters settings.
+let g:ale_linters_explicit = 1
 
 " auto-pairs
 Plug 'jiangmiao/auto-pairs'
@@ -251,3 +280,17 @@ let NERDTreeDirArrows = 1
 
 " Automatically delete buffer of file deleted in NERDTree
 let NERDTreeAutoDeleteBuffer = 1
+
+" Find files with preview window
+" https://github.com/junegunn/fzf.vim/issues/732
+let $BAT_THEME = 'Dracula'
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep('rg --column --no-heading --line-number --color=always '.shellescape(<q-args>),
+  \ 1,
+  \ fzf#vim#with_preview(),
+  \ <bang>0)
+
+command! -bang -nargs=? -complete=dir Files
+  \ call fzf#vim#files(<q-args>,
+  \ fzf#vim#with_preview(),
+  \ <bang>0)
