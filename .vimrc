@@ -4,12 +4,26 @@ syntax enable
 " term guicolors for dracula
 set termguicolors
 
-" Autoread changes to files
-set autoread
-
 " Case sensitivity
 set ignorecase
 set smartcase
+
+" change : for ,
+let mapleader = ","
+
+" quickly clear highlights
+map <leader>n :noh<CR>
+
+" reload files when they change on disk (e.g., git checkout)
+set autoread
+
+" shortcut to save
+nmap <leader>, :w<cr>
+
+" scroll the viewport faster
+nnoremap <C-e> 3<C-e>
+nnoremap <C-y> 3<C-y>
+
 " ================================================
 " SECTION: TABS, SPACES, and FOLDING 
 " ================================================
@@ -27,6 +41,19 @@ au BufNewFile,BufRead *.py
     \| set expandtab
     \| set autoindent
     \| set fileformat=unix
+
+" the same indent as the line you're currently on. Useful for READMEs, etc.
+set autoindent
+
+" Allow backspacing over autoindent, line breaks and start of insert action
+set backspace=indent,eol,start
+
+" Instead of failing a command because of unsaved changes, instead raise a
+" dialogue asking if you wish to save changed files.
+set confirm
+
+" Flag unnecessary whitespace
+au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
 
 " Make python code look pretty
 " let python_highlight_all=1
@@ -57,7 +84,7 @@ noremap <silent> <Right> <Nop>
 nnoremap <silent> <C-p> :Files<CR>
 
 " Switch to NERDTree hierarchy in normal or insert mode
-map <silent> <C-n> :NERDTreeFocus<CR>
+map <silent> <C-n> :NERDTreeToggle<CR>
 
 " Move text with Alt+j/k
 nnoremap ∆ :m .+1<CR>==
@@ -75,14 +102,17 @@ nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
-" jk is escape
-inoremap jk <esc>
-" in terminal mode as well
-tnoremap jk <C-\><C-n> 
-
 " Open new splits to the right or below
 set splitright
 set splitbelow
+" no more pesky escape (for insert and visual mode)
+imap jk  <Esc>
+imap jK <Esc>
+imap Jk <Esc>
+imap JK <Esc> 
+
+" in terminal mode as well
+tnoremap jk <C-\><C-n> 
 
 " show line numbers, relative when has focus, absolute otherwise
 " Use TAB and Shift-TAB to navigate completion list
@@ -120,6 +150,9 @@ set incsearch
 " highlight search matches
 set hlsearch
 
+" case-sensitive search if any caps
+set smartcase
+
 
 " ================================================
 " SECTION: PLUGINS 
@@ -133,6 +166,27 @@ Plug 'nvie/vim-flake8'
 " Fuzzy Finder
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --no-bash' }
 Plug 'junegunn/fzf.vim'
+
+" Fancy start screen for vim 
+Plug 'mhinz/vim-startify'
+
+" PEP8 Checking
+Plug 'nvie/vim-flake8'
+
+" Vimux - interact with tmux from vim
+Plug 'benmills/vimux'
+
+" Navigate tmux/vim windows easily
+Plug 'christoomey/vim-tmux-navigator'
+
+" Syntax highlighting when editing .tmux files
+Plug 'tmux-plugins/vim-tmux' 
+
+" vim chords
+Plug 'kana/vim-arpeggio'
+
+" vim-polyglot plugin
+Plug 'sheerun/vim-polyglot'
 
 " dracula color theme
 Plug 'dracula/vim', { 'as': 'dracula' }
@@ -240,11 +294,46 @@ Plug 'michaeljsmith/vim-indent-object'
 " Initialize plugin system
 call plug#end()
 
+" Attempt to determine the type of a file based on its name and possibly its
+" contents. Use this to allow intelligent auto-indenting for each filetype,
+" and for plugins that are filetype specific.
+filetype indent plugin on
+
 " set color scheme
 colorscheme dracula
 
 " Close the completion window when completion is done
 autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
+
+" ================================================
+" SECTION: VIMUX commands 
+" ================================================
+" Prompt for a command to run
+map <Leader>vp :VimuxPromptCommand<CR>
+
+" Run last command executed by VimuxRunCommand
+map <Leader>vl :VimuxRunLastCommand<CR>
+
+" Inspect runner pane
+map <Leader>vi :VimuxInspectRunner<CR>
+
+" Close vim tmux runner opened by VimuxRunCommand
+map <Leader>vq :VimuxCloseRunner<CR>
+
+" Open vimux pane
+map <Leader>vo :VimuxOpenPane<CR>
+
+" Interrupt any command running in the runner pane
+map <Leader>vx :VimuxInterruptRunner<CR>
+"
+" Function to make tmux zoom its runner pane.
+function! VimuxZoomRunner()
+  call VimuxInspectRunner()
+  call system("tmux resize-pane -Z")
+endfunction
+
+" Zoom the runner pane (use <bind-key> z to restore runner pane)
+map <Leader>vz :call VimuxZoomRunner()<CR>
 
 " ================================================
 " SECTION: NERDtree 
@@ -294,3 +383,11 @@ command! -bang -nargs=? -complete=dir Files
   \ call fzf#vim#files(<q-args>,
   \ fzf#vim#with_preview(),
   \ <bang>0)
+
+" ================================================
+" SECTION: CHORDS 
+" ================================================
+call arpeggio#map('n', '', 0, 'vl', ':VimuxRunLastCommand<CR>')
+call arpeggio#map('n', '', 0, 'vp', ':VimuxPromptCommand<CR>')
+call arpeggio#map('n', '', 0, 'vq', ':VimuxCloseRunner<CR>')
+call arpeggio#map('n', '', 0, 'pr', 'VimuxRunCommand("clear; pr<CR>')
