@@ -202,6 +202,8 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " Gutentags for cTag generation
 Plug 'ludovicchabant/vim-gutentags'
+" change directory where tags are stored
+let g:gutentags_cache_dir="~/.tags"
 
 " commentary
 Plug 'tpope/vim-commentary'
