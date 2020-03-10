@@ -161,7 +161,10 @@ set smartcase
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 
-"" PEP8 Checking
+" Emmet
+Plug 'mattn/emmet-vim'
+
+" PEP8 Checking
 Plug 'nvie/vim-flake8'
 
 " Fuzzy Finder
@@ -185,6 +188,11 @@ Plug 'tmux-plugins/vim-tmux'
 
 " vim chords
 Plug 'kana/vim-arpeggio'
+
+" vim js and jsx plugins
+Plug 'yuezk/vim-js'
+Plug 'maxmellon/vim-jsx-pretty'
+let g:polyglot_disabled = ['jsx']
 
 " vim-polyglot plugin
 Plug 'sheerun/vim-polyglot'
@@ -296,6 +304,9 @@ Plug 'michaeljsmith/vim-indent-object'
 
 " Initialize plugin system
 call plug#end()
+
+" Expand emmet using <Tab>
+imap <expr> <tab> emmet#expandAbbrIntelligent("\<tab>")
 
 " Attempt to determine the type of a file based on its name and possibly its
 " contents. Use this to allow intelligent auto-indenting for each filetype,
