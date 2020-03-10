@@ -27,9 +27,12 @@ nnoremap <C-y> 3<C-y>
 " ================================================
 " SECTION: TABS, SPACES, and FOLDING 
 " ================================================
-" number of visual spaces per TAB
+filetype plugin indent on
+" show existing tab with 4 spaces width
 set tabstop=4
-set softtabstop=4
+" when indenting with '>', use 4 spaces width
+set shiftwidth=4
+" On pressing tab, insert 4 spaces
 set expandtab
 
 " Python
@@ -38,7 +41,6 @@ au BufNewFile,BufRead *.py
     \| set softtabstop=4
     \| set shiftwidth=4
     \| set textwidth=79
-    \| set expandtab
     \| set autoindent
     \| set fileformat=unix
 
@@ -66,7 +68,6 @@ set encoding=utf-8
 
 " Code Folding
 set foldmethod=indent
-set foldlevel=1
 
 " ================================================
 " SECTION: Remapping keys
