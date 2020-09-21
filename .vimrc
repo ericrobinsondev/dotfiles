@@ -1,5 +1,5 @@
-" enable syntax processing
-syntax enable	
+
+syntax enable
 
 " term guicolors for dracula
 set termguicolors
@@ -8,8 +8,9 @@ set termguicolors
 set ignorecase
 set smartcase
 
-" change : for ,
-let mapleader = ","
+" change : for spacebar
+nnoremap <SPACE> <Nop>
+let mapleader = " "
 
 " quickly clear highlights
 map <leader>n :noh<CR>
@@ -18,14 +19,14 @@ map <leader>n :noh<CR>
 set autoread
 
 " shortcut to save
-nmap <leader>, :w<cr>
+nmap <leader><space> :w<cr>
 
 " scroll the viewport faster
 nnoremap <C-e> 3<C-e>
 nnoremap <C-y> 3<C-y>
 
 " ================================================
-" SECTION: TABS, SPACES, and FOLDING 
+" SECTION: TABS, SPACES, and FOLDING
 " ================================================
 filetype plugin indent on
 " show existing tab with 4 spaces width
@@ -52,7 +53,10 @@ set backspace=indent,eol,start
 
 " Instead of failing a command because of unsaved changes, instead raise a
 " dialogue asking if you wish to save changed files.
-set confirm
+" set confirm
+
+" Don't require saving a file before switching buffers
+set hidden
 
 " Flag unnecessary whitespace
 au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
@@ -67,13 +71,17 @@ let NERDTreeIgnore=['\.pyc$', '\~$']
 set encoding=utf-8
 
 " Code Folding
-set foldmethod=indent
+" set foldmethod=indent
+
+" UNDO persistance
+set undofile
+set undodir=~/.vim/undo
 
 " ================================================
 " SECTION: Remapping keys
 " ================================================
-" Enable folding with spacebar 
-nnoremap <expr> <space> foldclosed('.') != -1 ? 'zO' : 'zc'
+" Enable folding with spacebar
+" nnoremap <expr> <space> foldclosed('.') != -1 ? 'zO' : 'zc'
 
 " Do not use arrows in Normal mode
 noremap <silent> <Up>    <Nop>
@@ -82,10 +90,16 @@ noremap <silent> <Left>  <Nop>
 noremap <silent> <Right> <Nop>
 
 " fzf files shortcut
-nnoremap <silent> <C-p> :Files<CR>
+" nnoremap <silent> <C-p> :Files<CR> // this is default and doesn't respect
+" .gitignore
+nnoremap <expr> <C-p> (len(system('git rev-parse')) ? ':Files' : ':GFiles --exclude-standard --others --cached')."\<cr>"
 
 " Switch to NERDTree hierarchy in normal or insert mode
 map <silent> <C-n> :NERDTreeToggle<CR>
+
+" Use TAB and Shift-TAB to cycle through open buffers
+nnoremap <Tab> :bnext<CR>
+nnoremap <S-Tab> :bprevious<CR>
 
 " Move text with Alt+j/k
 nnoremap ∆ :m .+1<CR>==
@@ -110,19 +124,19 @@ set splitbelow
 imap jk  <Esc>
 imap jK <Esc>
 imap Jk <Esc>
-imap JK <Esc> 
+imap JK <Esc>
 
 " in terminal mode as well
-tnoremap jk <C-\><C-n> 
+tnoremap jk <C-\><C-n>
 
-" show line numbers, relative when has focus, absolute otherwise
 " Use TAB and Shift-TAB to navigate completion list
-inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+" inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+" inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
 " Use <cr> to confirm completion
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+" inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
+" show line numbers, relative when has focus, absolute otherwise
 :set number relativenumber
 :augroup numbertoggle
 :  autocmd!
@@ -154,15 +168,62 @@ set hlsearch
 " case-sensitive search if any caps
 set smartcase
 
+" Project-wide search with rip-grep CTRL-/
+nnoremap <C-_> :Rg<CR>
+
+" rip-grep word under cursor
+nnoremap <leader><_> :Rg! "\b<C-R><C-W\b"<CR>:cw<CR>
 
 " ================================================
-" SECTION: PLUGINS 
+" SECTION: PLUGINS
 " ================================================
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 
+" Base16 for Colors
+Plug 'chriskempson/base16-vim'
+
+" Fade Inactive buffers
+Plug 'TaDaa/vimade'
+let g:vimade = {'enablefocusfading': 1, "fadelevel": 0.9}
+au! FocusLost * VimadeFadeActive
+au! FocusGained * VimadeUnfadeActive
+
+"Rainbow brackets
+Plug 'junegunn/rainbow_parentheses.vim'
+augroup rainbow_lisp
+    autocmd!
+    autocmd Filetype python,javascript,lisp,clojure,scheme RainbowParentheses
+augroup END
+
+" BadWhitespace
+Plug 'bitc/vim-bad-whitespace'
+
+" easy-motion
+Plug 'easymotion/vim-easymotion'
+nmap f <Plug>(easymotion-f)
+nmap F <Plug>(easymotion-F)
+
+" Smooth scrolling of window
+Plug 'psliwka/vim-smoothie'
+
+" Visualize undo tree
+Plug 'simnalamburt/vim-mundo'
+
+" multiple cursors
+" Plug 'mg979/vim-visual-multi', {'branch': 'master'}
+
+" vim-repeat
+Plug 'tpope/vim-repeat'
+
 " Emmet
 Plug 'mattn/emmet-vim'
+" Use tab for trigger completion with characters ahead and navigate.
+" inoremap <silent><expr> <TAB>
+"       \ pumvisible() ? "\<C-n>" :
+"       \ <SID>check_back_space() ? "\<TAB>" :
+"       \ coc#refresh()
+" inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
 " PEP8 Checking
 Plug 'nvie/vim-flake8'
@@ -171,7 +232,7 @@ Plug 'nvie/vim-flake8'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --no-bash' }
 Plug 'junegunn/fzf.vim'
 
-" Fancy start screen for vim 
+" Fancy start screen for vim
 Plug 'mhinz/vim-startify'
 
 " PEP8 Checking
@@ -184,7 +245,7 @@ Plug 'benmills/vimux'
 Plug 'christoomey/vim-tmux-navigator'
 
 " Syntax highlighting when editing .tmux files
-Plug 'tmux-plugins/vim-tmux' 
+Plug 'tmux-plugins/vim-tmux'
 
 " vim chords
 Plug 'kana/vim-arpeggio'
@@ -198,13 +259,13 @@ let g:polyglot_disabled = ['jsx']
 Plug 'sheerun/vim-polyglot'
 
 " dracula color theme
-Plug 'dracula/vim', { 'as': 'dracula' }
+" Plug 'dracula/vim', { 'as': 'dracula' }
 
 " Fuzzy most recently used files
 Plug 'pbogut/fzf-mru.vim'
 
-" vim-polyglot plugin
-Plug 'sheerun/vim-polyglot'
+" Help ALE and coc.vim work together
+let g:ale_disable_lsp = 1
 
 " code completion
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -214,6 +275,10 @@ Plug 'ludovicchabant/vim-gutentags'
 " change directory where tags are stored
 let g:gutentags_cache_dir="~/.tags"
 
+" View tags of the currently viewed file
+Plug 'majutsushi/tagbar'
+" Open tagbar
+nmap <leader>t :TagbarToggle<CR>
 " commentary
 Plug 'tpope/vim-commentary'
 
@@ -223,8 +288,11 @@ Plug 'tpope/vim-surround'
 " vim-fugitive
 Plug 'tpope/vim-fugitive'
 
+" Show which line changed since last commit
+Plug 'airblade/vim-gitgutter'
+
 " Better folding
-Plug 'tmhedberg/SimpylFold'
+" Plug 'tmhedberg/SimpylFold'
 
 " Fast Fold
 Plug 'konfekt/FastFold'
@@ -238,9 +306,15 @@ Plug 'qpkorr/vim-bufkill'
 " Airline status bar
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
-let g:airline_theme='solarized'
+" Vim airline uses the dracula theme for it's airline_theme colors
+Plug 'dracula/vim', { 'as': 'dracula' }
+let g:airline_theme='dracula'
 let g:airline_solarized_bg='dark'
 let g:airline_powerline_fonts = 1
+" Show buffers in tabs at top
+let g:airline#extensions#tabline#enabled = 1
+" Show buffer numbers in tabs at top
+let g:airline#extensions#tabline#buffer_nr_show = 1
 
 " Prettier
 Plug 'prettier/vim-prettier', {
@@ -248,7 +322,8 @@ Plug 'prettier/vim-prettier', {
   \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'yaml', 'html'] }
 " Prettier format on save
 " let g:prettier#autoformat = 0
-" autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue PrettierAsync
+autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue PrettierAsync
+autocmd BufWritePre *.py EraseBadWhitespace
 
 if !exists('g:airline_symbols')
     let g:airline_symbols = {}
@@ -277,13 +352,18 @@ let g:airline_symbols.branch = ''
 let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
 
+" Asynchronous Linting
+Plug 'dense-analysis/ale'
 " Auto-lint on save
-let g:ale_fixers = {}
-let g:ale_fixers['javascript'] = ['eslint']
-let g:ale_fixers['python'] = ['black']
+let g:ale_fixers = {
+\    '*': ['remove_trailing_lines', 'trim_whitespace'],
+\    'javascript': ['eslint', 'prettier'],
+\}
 let g:ale_fix_on_save = 1
-let g:ale_linters = {}
-let g:ale_linters['python'] = ['flake8']
+let g:ale_linters = {
+\    'python': ['flake8'],
+\    'javascript': ['eslint', 'prettier']
+\}
 " Only run linters named in ale_linters settings.
 let g:ale_linters_explicit = 1
 
@@ -293,20 +373,34 @@ Plug 'jiangmiao/auto-pairs'
 " vim-test
 Plug 'janko/vim-test'
 " these "Ctrl mappings" work well when Caps Lock is mapped to Ctrl
-nmap <silent> t<C-n> :TestNearest<CR>
-nmap <silent> t<C-f> :TestFile<CR>
-nmap <silent> t<C-s> :TestSuite<CR>
-nmap <silent> t<C-l> :TestLast<CR>
-nmap <silent> t<C-g> :TestVisit<CR>
+nmap <silent> <leader>n :TestNearest<CR>
+nmap <silent> <leader>f :TestFile<CR>
+nmap <silent> <leader>s :TestSuite<CR>
+nmap <silent> <leader>l :TestLast<CR>
+" make test commands execute using vimux
+let test#strategy = "vimux"
+" Run python tests using our test runner
+let g:test#python#pytest#executable = 'python3 proj/manage.py test -- --reuse-db' . expand('%:p')
+
+function! TacoTest(cmd) abort
+    let s:cmd_array = split(a:cmd, "")
+    return 'python3 proj/manage.py test -- --reuse-db ' . expand('%:p:h') . "/" . s:cmd_array[-1]
+endfunction
+
+let g:test#custom_transformations = {'taco_test': function('TacoTest')}
+let g:test#transformation = 'taco_test'
 
 " vim-indent-object (useful for python)
 Plug 'michaeljsmith/vim-indent-object'
 
+" Provides text objects and motions for python
+Plug 'jeetsukumaran/vim-pythonsense'
+
+" Dev Icons
+Plug 'ryanoasis/vim-devicons'
+
 " Initialize plugin system
 call plug#end()
-
-" Expand emmet using <Tab>
-imap <expr> <tab> emmet#expandAbbrIntelligent("\<tab>")
 
 " Attempt to determine the type of a file based on its name and possibly its
 " contents. Use this to allow intelligent auto-indenting for each filetype,
@@ -314,13 +408,13 @@ imap <expr> <tab> emmet#expandAbbrIntelligent("\<tab>")
 filetype indent plugin on
 
 " set color scheme
-colorscheme dracula
+colorscheme base16-dracula
 
 " Close the completion window when completion is done
 autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
 
 " ================================================
-" SECTION: VIMUX commands 
+" SECTION: VIMUX commands
 " ================================================
 " Prompt for a command to run
 map <Leader>vp :VimuxPromptCommand<CR>
@@ -349,8 +443,27 @@ endfunction
 " Zoom the runner pane (use <bind-key> z to restore runner pane)
 map <Leader>vz :call VimuxZoomRunner()<CR>
 
+" Force vimux to open a new pane
+let g:VimuxUseNearest= 0
+
+" Expand emmet or coc.vim autocomplete with <tab>
+let g:user_emmet_leader_key = '<C-e>'
+let g:user_emmet_expandabbr_key = '<C-x><C-e>'
+imap <silent><expr> <Tab> <SID>expand()
+
+function! s:expand()
+  if pumvisible()
+    return "\<C-n>"
+  endif
+  let col = col('.') - 1
+  if !col || getline('.')[col - 1]  =~# '\s'
+    return "\<Tab>"
+  endif
+  return "\<C-x>\<C-e>"
+endfunction
+
 " ================================================
-" SECTION: NERDtree 
+" SECTION: NERDtree
 " ================================================
 
 " NERDTrees File highlighting
@@ -374,8 +487,8 @@ call NERDTreeHighlightFile('js', 'Red', 'none', '#ffa500', '#151515')
 call NERDTreeHighlightFile('php', 'Magenta', 'none', '#ff00ff', '#151515')
 
 " Open NERDtree when vim opens without a file
-autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+" autocmd StdinReadPre * let s:std_in=1
+" autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 
 " Make NERDTree look pretty
 let NERDTreeMinimalUI = 1
@@ -399,9 +512,9 @@ command! -bang -nargs=? -complete=dir Files
   \ <bang>0)
 
 " ================================================
-" SECTION: CHORDS 
+" SECTION: CHORDS
 " ================================================
 call arpeggio#map('n', '', 0, 'vl', ':VimuxRunLastCommand<CR>')
 call arpeggio#map('n', '', 0, 'vp', ':VimuxPromptCommand<CR>')
-call arpeggio#map('n', '', 0, 'vq', ':VimuxCloseRunner<CR>')
+call arpeggio#map('n', '', 0, 'v;', ':VimuxCloseRunner<CR>')
 call arpeggio#map('n', '', 0, 'pr', 'VimuxRunCommand("clear; pr<CR>')
