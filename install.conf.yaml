@@ -5,4 +5,8 @@
     ~/.vimrc: vimrc
     ~/.zshrc: zshrc
 
-
+- create:
+    ~/.vim/undo
+    ~/.vim/plugged
+    ~/.fzf
+    ~/.tags
