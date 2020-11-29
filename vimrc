@@ -326,6 +326,9 @@ Plug 'tpope/vim-surround'
 " vim-fugitive
 Plug 'tpope/vim-fugitive'
 
+" Add :Gca command to include coauthor in fugitive commit messages.
+command! -nargs=+ Gca :r!git log -n100 --pretty=format:"\%an <\%ae>" | grep -i '<args>' | head -1 | xargs echo "Co-authored-by:"
+
 " Show which line changed since last commit
 Plug 'airblade/vim-gitgutter'
 
