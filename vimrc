@@ -20,7 +20,7 @@ set autoread
 " reload files when changing buffers within vim
 au FocusGained,BufEnter * :checktime
 
-" shortcut to close current buffer
+" shortcut to close current buffer but leave split open
 nmap <leader>d :bd<cr>
 
 " scroll the viewport faster
@@ -186,6 +186,11 @@ nnoremap <leader><_> :Rg! "\b<C-R><C-W\b"<CR>:cw<CR>
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 
+" Vim unimpaired
+Plug 'tpope/vim-unimpaired'
+
+" Markdown related plugins
+Plug 'gabrielelana/vim-markdown'
 
 " vimspector - debugger
 Plug 'puremourning/vimspector'
@@ -219,6 +224,9 @@ function! s:check_back_space() abort
 endfunction
 
 let g:coc_snippet_next = '<tab>'
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gr <Plug>(coc-references)
 
 " Fade Inactive buffers
 Plug 'TaDaa/vimade'
@@ -325,6 +333,12 @@ Plug 'tpope/vim-surround'
 
 " vim-fugitive
 Plug 'tpope/vim-fugitive'
+
+" vim-fugitive extension for working with branches
+Plug 'idanarye/vim-merginal'
+
+" View git commit history easily
+Plug 'junegunn/gv.vim'
 
 " Add :Gca command to include coauthor in fugitive commit messages.
 command! -nargs=+ Gca :r!git log -n100 --pretty=format:"\%an <\%ae>" | grep -i '<args>' | head -1 | xargs echo "Co-authored-by:"
