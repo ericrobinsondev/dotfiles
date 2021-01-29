@@ -151,3 +151,8 @@ BASE16_SHELL="$HOME/.config/base16-shell/"
 [ -n "$PS1" ] && \
     [ -s "$BASE16_SHELL/profile_helper.sh" ] && \
         eval "$("$BASE16_SHELL/profile_helper.sh")"
+
+# Use fzf to checkout branches
+gch() {
+ git checkout “$(git branch —-all | fzf| tr -d ‘[:space:]’)”
+}
