@@ -13,7 +13,7 @@ set smartcase
 let mapleader = ","
 
 " quickly clear highlights
-map <leader>n :noh<CR>
+map <leader>h :noh<CR>
 
 " reload files when they change on disk (e.g., git checkout)
 set autoread
@@ -172,13 +172,25 @@ set smartcase
 
 " Rg from the project root of the current buffer
 command! -bang -nargs=* PRg
-  \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1, {'dir': system('git -C '.expand('%:p:h').' rev-parse --show-toplevel 2> /dev/null')[:-2]}, <bang>0)
+  \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1, fzf#vim#with_preview(), <bang>0)
 
 " Project-wide search with rip-grep CTRL-/
 nnoremap <C-_> :PRg<CR>
 
 " rip-grep word under cursor
-nnoremap <leader><_> :Rg! "\b<C-R><C-W\b"<CR>:cw<CR>
+function FzfTagsCurrentWord()
+    let l:cmd_format = "rg %s --column --line-number --no-heading --color=always --smart-case"
+    let l:interpolated_cmd = printf(l:cmd_format, expand('<cword>'))
+    call fzf#vim#grep(l:interpolated_cmd, 1, fzf#vim#with_preview())
+endfunction
+nnoremap <c-[> :call FzfTagsCurrentWord()<CR>
+
+function FzfTagsCurrentClass()
+    let l:cmd_format = "rg 'class %s' --column --line-number --no-heading --color=always --smart-case"
+    let l:interpolated_cmd = printf(l:cmd_format, expand('<cword>'))
+    call fzf#vim#grep(l:interpolated_cmd, 1, fzf#vim#with_preview())
+endfunction
+nnoremap <leader>c :call FzfTagsCurrentClass()<CR>
 
 " ================================================
 " SECTION: PLUGINS
@@ -277,6 +289,12 @@ Plug 'nvie/vim-flake8'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --no-bash' }
 Plug 'junegunn/fzf.vim'
 
+" Open in existing buffer if possible
+let g:fzf_buffers_jump = 1
+" Always preview fzf to the right
+let g:fzf_preview_window = 'right:60%'
+
+
 " Fancy start screen for vim
 Plug 'mhinz/vim-startify'
 
@@ -319,6 +337,20 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'ludovicchabant/vim-gutentags'
 " change directory where tags are stored
 let g:gutentags_cache_dir="~/.tags"
+" don't tag files in .gitignore
+let g:gutentags_file_list_command = 'rg --files'
+
+" https://www.reddit.com/r/vim/comments/d77t6j/guide_how_to_setup_ctags_with_gutentags_properly/
+let g:gutentags_generate_on_new = 1
+let g:gutentags_generate_on_missing = 1
+let g:gutentags_generate_on_write = 1
+let g:gutentags_generate_on_empty_buffer = 0
+let g:gutentags_ctags_extra_args = [
+      \ '--tag-relative=yes',
+      \ '--fields=+ailmnS',
+      \ ]
+
+let g:gutentags_ctags_exclude = [ '*.git', '*.svg', '*.hg', '*/tests/*', 'build', 'dist', '*sites/*/files/*', 'bin', 'node_modules', 'bower_components', 'cache', 'compiled', 'docs', 'example', 'bundle', 'vendor', '*.md', '*-lock.json', '*.lock', '*bundle*.js', '*build*.js', '.*rc*', '*.json', '*.min.*', '*.map', '*.bak', '*.zip', '*.pyc', '*.class', '*.sln', '*.Master', '*.csproj', '*.tmp', '*.csproj.user', '*.cache', '*.pdb', 'tags*', 'cscope.*', '*.css', '*.less', '*.scss', '*.exe', '*.dll', '*.mp3', '*.ogg', '*.flac', '*.swp', '*.swo', '*.bmp', '*.gif', '*.ico', '*.jpg', '*.png', '*.rar', '*.zip', '*.tar', '*.tar.gz', '*.tar.xz', '*.tar.bz2', '*.pdf', '*.doc', '*.docx', '*.ppt', '*.pptx', ]
 
 " View tags of the currently viewed file
 Plug 'majutsushi/tagbar'
@@ -463,12 +495,6 @@ Plug 'sjl/gundo.vim'
 " setup gundo plugin to display the undo tree with <leader>u
 let g:gundo_prefer_python3 = 1
 nnoremap <leader>u :GundoToggle<CR>
-" Visual undo tree
-Plug 'sjl/gundo.vim'
-
-" setup gundo plugin to display the undo tree with <leader>u
-let g:gundo_prefer_python3 = 1
-nnoremap <leader>u :GundoToggle<CR>
 
 " Initialize plugin system
 call plug#end()
@@ -579,7 +605,7 @@ command! -bang -nargs=* Rg
 
 command! -bang -nargs=? -complete=dir Files
   \ call fzf#vim#files(<q-args>,
-  \ fzf#vim#with_preview(),
+  \ fzf#vim#with_preview('right'),
   \ <bang>0)
 
 " ================================================
