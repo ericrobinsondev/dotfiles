@@ -1,4 +1,3 @@
-
 syntax enable
 
 " term guicolors for dracula
@@ -222,7 +221,10 @@ Plug 'chriskempson/base16-vim'
 Plug 'wsdjeg/vim-fetch'
 
 " Snippets for vim
+Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
+Plug 'mlaursen/vim-react-snippets'
+
 " Make <tab> trigger completion, completion confirm, and jump like VSCode
 inoremap <silent><expr> <TAB>
       \ pumvisible() ? coc#_select_confirm() :
@@ -313,9 +315,31 @@ Plug 'tmux-plugins/vim-tmux'
 " vim chords
 Plug 'kana/vim-arpeggio'
 
-" vim js and jsx plugins
+" Auto close tags
+Plug 'alvan/vim-closetag'
+" Update closetag to also work on js and html files, don't want ts since <> is used for type args
+let g:closetag_filenames='*.html,*.js,*.jsx,*.tsx'
+let g:closetag_regions = {
+    \ 'typescript': 'jsxRegion',
+    \ 'typescriptreact': 'jsxRegion,tsxRegion',
+    \ 'typescript.tsx': 'jsxRegion,tsxRegion',
+    \ 'javascript.jsx': 'jsxRegion',
+    \ 'javascriptreact': 'jsxRegion',
+    \ }
+
+" Italics for dank mono
+Plug 'codehearts/mascara-vim'
+
+" settings for italics with dank mono
+set t_ZH=[3m
+set t_ZR=[23m
+highlight Comment gui=italic
+highlight Italic gui=italic
+
+"vim js and jsx plugins
 Plug 'yuezk/vim-js'
 Plug 'maxmellon/vim-jsx-pretty'
+hi xmlAttrib cterm=italic ctermfg=214
 let g:polyglot_disabled = ['jsx']
 
 " vim-polyglot plugin
@@ -332,6 +356,16 @@ let g:ale_disable_lsp = 1
 
 " code completion
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+let g:coc_global_extensions = [
+\'coc-css',
+\'coc-fzf-preview',
+\'coc-highlight',
+\'coc-html',
+\'coc-python',
+\'coc-tsserver',
+\]
+
+Plug 'iamcco/coc-tailwindcss',  {'do': 'yarn install --frozen-lockfile && yarn run build'}
 
 " Gutentags for cTag generation
 Plug 'ludovicchabant/vim-gutentags'
@@ -406,7 +440,7 @@ let g:airline#extensions#tabline#buffer_nr_show = 1
 " Prettier
 Plug 'prettier/vim-prettier', {
   \ 'do': 'yarn install',
-  \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'yaml', 'html'] }
+  \ 'for': ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'yaml', 'html'] }
 " Prettier format on save
 " let g:prettier#autoformat = 0
 autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue PrettierAsync
@@ -449,7 +483,7 @@ let g:ale_fixers = {
 let g:ale_fix_on_save = 1
 let g:ale_linters = {
 \    'python': ['flake8'],
-\    'javascript': ['eslint', 'prettier']
+\    'javascript': ['eslint', 'prettier'],
 \}
 " Only run linters named in ale_linters settings.
 let g:ale_linters_explicit = 1
@@ -506,6 +540,7 @@ filetype indent plugin on
 
 " set color scheme
 colorscheme base16-dracula
+" colorscheme dracula
 
 " Close the completion window when completion is done
 autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
