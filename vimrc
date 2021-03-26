@@ -241,6 +241,8 @@ let g:coc_snippet_next = '<tab>'
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gr <Plug>(coc-references)
+nmap <leader>do <Plug>(coc-codeaction)
+nmap <leader>rn <Plug>(coc-rename)
 
 " Fade Inactive buffers
 Plug 'TaDaa/vimade'
@@ -262,6 +264,9 @@ Plug 'bitc/vim-bad-whitespace'
 Plug 'easymotion/vim-easymotion'
 nmap f <Plug>(easymotion-f)
 nmap F <Plug>(easymotion-F)
+" Disable coc-eslint while moving via easymotion
+autocmd User EasyMotionPromptBegin silent! CocDisable
+autocmd User EasyMotionPromptEnd silent! CocEnable
 
 " Smooth scrolling of window
 Plug 'psliwka/vim-smoothie'
@@ -336,11 +341,19 @@ set t_ZR=[23m
 highlight Comment gui=italic
 highlight Italic gui=italic
 
-"vim js and jsx plugins
+"vim js/ts and jsx/tsx plugins
 Plug 'yuezk/vim-js'
 Plug 'maxmellon/vim-jsx-pretty'
 hi xmlAttrib cterm=italic ctermfg=214
 let g:polyglot_disabled = ['jsx']
+Plug 'leafgarland/typescript-vim'
+Plug 'peitalin/vim-jsx-typescript'
+Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
+Plug 'jparise/vim-graphql'
+
+" Prevent Syntax highlighting getting out of sync halfway through file
+autocmd BufEnter *.{js,jsx,ts,tsx} :syntax sync fromstart
+autocmd BufLeave *.{js,jsx,ts,tsx} :syntax sync clear
 
 " vim-polyglot plugin
 Plug 'sheerun/vim-polyglot'
@@ -363,7 +376,20 @@ let g:coc_global_extensions = [
 \'coc-html',
 \'coc-python',
 \'coc-tsserver',
+\'coc-snippets',
+\'coc-eslint',
+\'coc-prettier',
+\'coc-json',
+\'coc-pairs',
 \]
+
+if isdirectory('./node_modules') && isdirectory('./node_modules/prettier')
+  let g:coc_global_extensions += ['coc-prettier']
+endif
+
+if isdirectory('./node_modules') && isdirectory('./node_modules/eslint')
+  let g:coc_global_extensions += ['coc-eslint']
+endif
 
 Plug 'iamcco/coc-tailwindcss',  {'do': 'yarn install --frozen-lockfile && yarn run build'}
 
@@ -437,13 +463,6 @@ let g:airline#extensions#tabline#enabled = 1
 " Show buffer numbers in tabs at top
 let g:airline#extensions#tabline#buffer_nr_show = 1
 
-" Prettier
-Plug 'prettier/vim-prettier', {
-  \ 'do': 'yarn install',
-  \ 'for': ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'yaml', 'html'] }
-" Prettier format on save
-" let g:prettier#autoformat = 0
-autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue PrettierAsync
 autocmd BufWritePre *.py EraseBadWhitespace
 
 if !exists('g:airline_symbols')
