@@ -1,5 +1,8 @@
 syntax enable
 
+" enable per-project vimrc files
+set exrc
+
 " term guicolors for dracula
 set termguicolors
 
@@ -49,6 +52,10 @@ au BufNewFile,BufRead *.py
 " the same indent as the line you're currently on. Useful for READMEs, etc.
 set autoindent
 
+" help vim indent more smartly when <cr>
+" set indentexpr=
+set smartindent
+
 " Allow backspacing over autoindent, line breaks and start of insert action
 set backspace=indent,eol,start
 
@@ -77,6 +84,9 @@ set encoding=utf-8
 " UNDO persistance
 set undofile
 set undodir=~/.vim/undo
+
+" go-to file anywhere on the line
+nnoremap gf ^f/gf
 
 " ================================================
 " SECTION: Remapping keys
@@ -130,13 +140,6 @@ imap JK <Esc>
 " in terminal mode as well
 tnoremap jk <C-\><C-n>
 
-" Use TAB and Shift-TAB to navigate completion list
-" inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-" inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-
-" Use <cr> to confirm completion
-" inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-
 " show line numbers, relative when has focus, absolute otherwise
 :set number relativenumber
 :augroup numbertoggle
@@ -171,7 +174,7 @@ set smartcase
 
 " Rg from the project root of the current buffer
 command! -bang -nargs=* PRg
-  \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1, fzf#vim#with_preview(), <bang>0)
+  \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1, fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}), <bang>0)
 
 " Project-wide search with rip-grep CTRL-/
 nnoremap <C-_> :PRg<CR>
@@ -197,8 +200,14 @@ nnoremap <leader>c :call FzfTagsCurrentClass()<CR>
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 
+" Python black formatter
+Plug 'psf/black', { 'branch': 'stable' }
+
 " Vim unimpaired
 Plug 'tpope/vim-unimpaired'
+
+" Makes text in quickfix editable
+Plug 'stefandtw/quickfix-reflector.vim'
 
 " Markdown related plugins
 Plug 'gabrielelana/vim-markdown'
@@ -224,6 +233,7 @@ Plug 'wsdjeg/vim-fetch'
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 Plug 'mlaursen/vim-react-snippets'
+let g:UltiSnipsExpandTrigger='<c-space>'
 
 " Make <tab> trigger completion, completion confirm, and jump like VSCode
 inoremap <silent><expr> <TAB>
@@ -238,6 +248,9 @@ function! s:check_back_space() abort
 endfunction
 
 let g:coc_snippet_next = '<tab>'
+" Use <CR> to choose snippet
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gr <Plug>(coc-references)
@@ -288,9 +301,6 @@ Plug 'mattn/emmet-vim'
 "       \ <SID>check_back_space() ? "\<TAB>" :
 "       \ coc#refresh()
 " inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-" PEP8 Checking
-Plug 'nvie/vim-flake8'
 
 " Fuzzy Finder
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --no-bash' }
@@ -374,7 +384,7 @@ let g:coc_global_extensions = [
 \'coc-fzf-preview',
 \'coc-highlight',
 \'coc-html',
-\'coc-python',
+\'coc-pyright',
 \'coc-tsserver',
 \'coc-snippets',
 \'coc-eslint',
@@ -383,6 +393,25 @@ let g:coc_global_extensions = [
 \'coc-pairs',
 \]
 
+" When hovering over word, show diagnostic if exists. Otherwise show
+" documentation
+" function! ShowDocIfNoDiagnostic(timer_id)
+"   if (coc#util#has_float() == 0)
+"     silent call CocActionAsync('doHover')
+"   endif
+" endfunction
+
+" function! s:show_hover_doc()
+"   call timer_start(500, 'ShowDocIfNoDiagnostic')
+" endfunction
+
+" autocmd CursorHoldI * :call <SID>show_hover_doc()
+" autocmd CursorHold * :call <SID>show_hover_doc()
+
+" Highlight the symbol and its references when holding the cursor.
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Install eslint/prettier if available in project directory
 if isdirectory('./node_modules') && isdirectory('./node_modules/prettier')
   let g:coc_global_extensions += ['coc-prettier']
 endif
@@ -391,7 +420,7 @@ if isdirectory('./node_modules') && isdirectory('./node_modules/eslint')
   let g:coc_global_extensions += ['coc-eslint']
 endif
 
-Plug 'iamcco/coc-tailwindcss',  {'do': 'yarn install --frozen-lockfile && yarn run build'}
+Plug 'rodrigore/coc-tailwind-intellisense', {'do': 'npm install'}
 
 " Gutentags for cTag generation
 Plug 'ludovicchabant/vim-gutentags'
@@ -463,7 +492,7 @@ let g:airline#extensions#tabline#enabled = 1
 " Show buffer numbers in tabs at top
 let g:airline#extensions#tabline#buffer_nr_show = 1
 
-autocmd BufWritePre *.py EraseBadWhitespace
+autocmd BufWritePre *.py execute ':Black'
 
 if !exists('g:airline_symbols')
     let g:airline_symbols = {}
@@ -491,24 +520,6 @@ let g:airline_right_alt_sep = ''
 let g:airline_symbols.branch = ''
 let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
-
-" Asynchronous Linting
-Plug 'dense-analysis/ale'
-" Auto-lint on save
-let g:ale_fixers = {
-\    '*': ['remove_trailing_lines', 'trim_whitespace'],
-\    'javascript': ['eslint', 'prettier'],
-\}
-let g:ale_fix_on_save = 1
-let g:ale_linters = {
-\    'python': ['flake8'],
-\    'javascript': ['eslint', 'prettier'],
-\}
-" Only run linters named in ale_linters settings.
-let g:ale_linters_explicit = 1
-
-" auto-pairs
-Plug 'jiangmiao/auto-pairs'
 
 " vim-test
 Plug 'janko/vim-test'
@@ -652,7 +663,7 @@ let NERDTreeAutoDeleteBuffer = 1
 " https://github.com/junegunn/fzf.vim/issues/732
 let $BAT_THEME = 'Dracula'
 command! -bang -nargs=* Rg
-  \ call fzf#vim#grep('rg --column --no-heading --line-number --color=always '.shellescape(<q-args>),
+  \ call fzf#vim#grep('rg --column --no-heading --line-number --color=always '.<q-args>,
   \ 1,
   \ fzf#vim#with_preview(),
   \ <bang>0)
@@ -677,3 +688,6 @@ call arpeggio#map('n', '', 0, 'pr', 'VimuxRunCommand("clear; pr<CR>')
 nnoremap ,, :w<cr>
 " remove easymotion's <leader><leader> mapping
 map <Leader>)) <Plug>(easymotion-prefix)
+
+" for project-specific vimrc files, only run if I own them
+set secure
