@@ -20,6 +20,9 @@ key_mapper('v', 'jk', '<ESC>')
 key_mapper('v', 'JK', '<ESC>')
 key_mapper('v', 'jK', '<ESC>')
 
+-- save shortcut
+key_mapper('n', ',,', ':w<cr>')
+
 -- LSP mappings
 key_mapper('n', 'gd', ':lua vim.lsp.buf.definition()<CR>')
 key_mapper('n', 'gD', ':lua vim.lsp.buf.declaration()<CR>')
@@ -42,3 +45,6 @@ key_mapper('n', '<leader>fb', ':lua require"telescope.builtin".buffers()<CR>')
 -- NvimTree
 key_mapper('n', '<C-n>', ':NvimTreeToggle<CR>')
 
+-- Bufferline tabs
+key_mapper('n', '<Tab>', ':BufferLineCycleNext<CR>')
+key_mapper('n', '<S-Tab>', ':BufferLineCyclePrev<CR>')

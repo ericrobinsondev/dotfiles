@@ -2,7 +2,6 @@ local o = vim.opt
 
 -- Appearance
 o.cmdheight = 1
-o.colorcolumn = '80'
 o.cursorline = true
 -- o.foldmethod = 'marker'
 o.number = true

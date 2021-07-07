@@ -67,7 +67,6 @@ packer.startup(function()
     vim.opt.termguicolors = true
     require("bufferline").setup{}
 
-
     -- Fuzzy Finding
     use {
       'nvim-telescope/telescope.nvim',
@@ -114,6 +113,7 @@ packer.startup(function()
         qflist_previewer = require'telescope.previewers'.vim_buffer_qflist.new,
       }
     }
+
     -- Close search box with ESC
     local actions = require('telescope.actions')
     require('telescope').setup{
@@ -128,8 +128,14 @@ packer.startup(function()
 
     use 'jremmen/vim-ripgrep'
 
+    -- Text Objects
+    use 'wellle/targets.vim'
+
     -- File Explorer
     use 'kyazdani42/nvim-tree.lua'
+
+    -- tmux
+    use 'christoomey/vim-tmux-navigator'
 
     -- Git
     use {
@@ -144,6 +150,18 @@ packer.startup(function()
 
     use 'tpope/vim-fugitive'
 
+    -- Completion
+    use 'hrsh7th/nvim-compe' 
+    require('plugins.compe')
+
+    -- Trouble / display lsp diagnostics
+    use {
+      "folke/trouble.nvim",
+      requires = "kyazdani42/nvim-web-devicons",
+      config = function()
+        require("trouble").setup {}
+      end
+    }
 
     -- LSP
     use 'neovim/nvim-lspconfig'
