@@ -24,6 +24,21 @@ packer.startup(function()
     use 'Mofiqul/dracula.nvim'
     vim.cmd[[colorscheme dracula]]
 
+    -- add missing colors to highlight groups that are missing
+    use 'folke/lsp-colors.nvim'
+
+    -- rainbow brackets
+    use 'p00f/nvim-ts-rainbow'
+    require'nvim-treesitter.configs'.setup {
+      rainbow = {
+        enable = true,
+        extended_mode = true, -- Highlight also non-parentheses delimiters, boolean or table: lang -> boolean
+        max_file_lines = 1000, -- Do not enable for files with more than 1000 lines, int
+        colors = {}, -- table of hex strings
+        termcolors = {}, -- table of colour name strings
+      }
+    }
+
     -- Dim inactive windows
     use 'sunjon/shade.nvim'
     require'shade'.setup({
@@ -35,6 +50,10 @@ packer.startup(function()
         toggle           = '<Leader>s',
       }
     })
+
+   -- Indent markers
+   use "lukas-reineke/indent-blankline.nvim"
+   vim.g.indent_blankline_char = "│"
 
     -- status line
     use {
@@ -57,7 +76,29 @@ packer.startup(function()
       }
     }
 
-    use 'sheerun/vim-polyglot'
+    use {'sheerun/vim-polyglot'}
+
+    -- Tagbar-like plugin
+    use {'simrat39/symbols-outline.nvim'}
+    vim.g.symbols_outline = {
+        highlight_hovered_item = true,
+        show_guides = true,
+        auto_preview = true,
+        position = 'right',
+        show_numbers = false,
+        show_relative_numbers = false,
+        show_symbol_details = true,
+        keymaps = {
+            close = "<Esc>",
+            goto_location = "<Cr>",
+            focus_location = "o",
+            hover_symbol = "<C-space>",
+            rename_symbol = "r",
+            code_actions = "a",
+        },
+        lsp_blacklist = {},
+    }
+
 
     -- code formatting
     use {'prettier/vim-prettier', run = 'yarn install' }
@@ -67,6 +108,34 @@ packer.startup(function()
     vim.opt.termguicolors = true
     require("bufferline").setup{}
 
+    -- smooth scrolling
+    use 'karb94/neoscroll.nvim'
+    require('neoscroll').setup()
+
+    -- Hop, an EasyMotion-like plugin
+    use {
+      'phaazon/hop.nvim',
+      as = 'hop',
+      config = function()
+        require'hop'.setup { keys = 'etovxqpdygfblzhckisuran' }
+      end
+    }
+    require'hop'.setup()
+
+
+    -- vim-tmux-navigator
+    use { 'alexghergh/nvim-tmux-navigation', config = function()
+        require'nvim-tmux-navigation'.setup {
+            disable_when_zoomed = true,
+            keybindings = {
+                left = "<C-h>",
+                down = "<C-j>",
+                up = "<C-k>",
+                right = "<C-l>",
+            }
+        }
+    end
+    }
     -- Fuzzy Finding
     use {
       'nvim-telescope/telescope.nvim',
@@ -101,7 +170,7 @@ packer.startup(function()
         file_sorter =  require'telescope.sorters'.get_fuzzy_file,
         file_ignore_patterns = {},
         generic_sorter =  require'telescope.sorters'.get_generic_fuzzy_sorter,
-        shorten_path = true,
+        path_display = true,
         winblend = 0,
         border = {},
         borderchars = { '─', '│', '─', '│', '╭', '╮', '╯', '╰' },
@@ -131,11 +200,17 @@ packer.startup(function()
     -- Text Objects
     use 'wellle/targets.vim'
 
+    -- Surround
+    use {
+      "blackCauldron7/surround.nvim",
+      config = function()
+        require "surround".setup {}
+      end
+    }
+
+
     -- File Explorer
     use 'kyazdani42/nvim-tree.lua'
-
-    -- tmux
-    use 'christoomey/vim-tmux-navigator'
 
     -- Git
     use {
@@ -153,6 +228,12 @@ packer.startup(function()
     -- Completion
     use 'hrsh7th/nvim-compe' 
     require('plugins.compe')
+
+    -- Show function signatures
+    use {
+      "ray-x/lsp_signature.nvim",
+    }
+    require "lsp_signature".setup()
 
     -- Trouble / display lsp diagnostics
     use {

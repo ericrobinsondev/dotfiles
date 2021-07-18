@@ -48,3 +48,9 @@ key_mapper('n', '<C-n>', ':NvimTreeToggle<CR>')
 -- Bufferline tabs
 key_mapper('n', '<Tab>', ':BufferLineCycleNext<CR>')
 key_mapper('n', '<S-Tab>', ':BufferLineCyclePrev<CR>')
+
+-- Hop
+key_mapper('n', 'f', ":lua require'hop'.hint_char1()<cr>")
+
+-- Symbols Outline
+key_mapper('n', '<C-t>', ':SymbolsOutline<CR>')
