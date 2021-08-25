@@ -103,6 +103,9 @@ packer.startup(function()
     -- code formatting
     use {'prettier/vim-prettier', run = 'yarn install' }
 
+    -- icons
+    use {'kyazdani42/nvim-web-devicons'}
+
     -- Buffer tabs
     use {'akinsho/nvim-bufferline.lua', requires = 'kyazdani42/nvim-web-devicons'}
     vim.opt.termguicolors = true
@@ -141,16 +144,30 @@ packer.startup(function()
       'nvim-telescope/telescope.nvim',
       requires = {{'nvim-lua/popup.nvim'}, {'nvim-lua/plenary.nvim'}}
     }
+    use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
+    local actions = require('telescope.actions')
     require('telescope').setup{
+      extensions = {
+        fzf = {
+          fuzzy = true,                    -- false will only do exact matching
+          override_generic_sorter = false, -- override the generic sorter
+          override_file_sorter = true,     -- override the file sorter
+          case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+        },
+      },
       defaults = {
         vimgrep_arguments = {
           'rg',
-          '--color=never',
           '--no-heading',
           '--with-filename',
           '--line-number',
           '--column',
           '--smart-case'
+        },
+        mappings = {
+          i = {
+            ["<esc>"] = actions.close      -- Close search box with ESC
+          },
         },
         prompt_prefix = "> ",
         selection_caret = "> ",
@@ -170,7 +187,7 @@ packer.startup(function()
         file_sorter =  require'telescope.sorters'.get_fuzzy_file,
         file_ignore_patterns = {},
         generic_sorter =  require'telescope.sorters'.get_generic_fuzzy_sorter,
-        path_display = true,
+        path_display = { "shorten" },
         winblend = 0,
         border = {},
         borderchars = { '─', '│', '─', '│', '╭', '╮', '╯', '╰' },
@@ -183,17 +200,8 @@ packer.startup(function()
       }
     }
 
-    -- Close search box with ESC
-    local actions = require('telescope.actions')
-    require('telescope').setup{
-      defaults = {
-        mappings = {
-          i = {
-            ["<esc>"] = actions.close
-          },
-        },
-      }
-    }
+    -- fzf-native 
+    require('telescope').load_extension('fzf')
 
     use 'jremmen/vim-ripgrep'
 
