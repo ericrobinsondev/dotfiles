@@ -263,7 +263,7 @@ packer.startup(function()
     -- LSP
     use 'neovim/nvim-lspconfig'
     use 'nvim-lua/completion-nvim'
-    use 'anott03/nvim-lspinstall'
+    use 'williamboman/nvim-lsp-installer'
 
     local lspconfig = require'lspconfig'
     local completion = require'completion'
