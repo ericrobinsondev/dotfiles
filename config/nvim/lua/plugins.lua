@@ -234,8 +234,16 @@ packer.startup(function()
     use 'tpope/vim-fugitive'
 
     -- Completion
-    use 'hrsh7th/nvim-compe' 
-    require('plugins.compe')
+    use 'hrsh7th/cmp-nvim-lsp'
+    use 'hrsh7th/cmp-buffer'
+    use 'hrsh7th/cmp-path'
+    use 'hrsh7th/cmp-cmdline'
+    use 'hrsh7th/nvim-cmp' 
+    use 'onsails/lspkind-nvim'
+    require('plugins.cmp')
+
+    use 'hrsh7th/cmp-vsnip'
+    use 'hrsh7th/vim-vsnip'
 
     -- Show function signatures
     use {
