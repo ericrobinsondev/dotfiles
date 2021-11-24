@@ -239,6 +239,11 @@ packer.startup(function()
 
     -- DAP Debugging
     use 'mfussenegger/nvim-dap'
+    use "Pocco81/DAPInstall.nvim"
+    require('dap-install').setup({
+        installation_path = vim.fn.stdpath('data') .. '/dapinstall/',
+    })
+    require('plugins/dapinstall')
     use 'theHamsta/nvim-dap-virtual-text'
     require("nvim-dap-virtual-text").setup()
     use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"} }
