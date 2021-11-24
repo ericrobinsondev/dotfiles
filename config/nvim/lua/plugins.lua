@@ -20,6 +20,9 @@ packer.init({
 packer.startup(function()
     local use = use
 
+    -- Dashboard startup
+    use 'mhinz/vim-startify'
+
     -- color theme
     use 'Mofiqul/dracula.nvim'
     vim.cmd[[colorscheme dracula]]
@@ -219,6 +222,7 @@ packer.startup(function()
 
     -- File Explorer
     use 'kyazdani42/nvim-tree.lua'
+    require 'nvim-tree'.setup {}
 
     -- Git
     use {
@@ -232,6 +236,16 @@ packer.startup(function()
     }
 
     use 'tpope/vim-fugitive'
+
+    -- DAP Debugging
+    use 'mfussenegger/nvim-dap'
+    use 'theHamsta/nvim-dap-virtual-text'
+    require("nvim-dap-virtual-text").setup()
+    use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"} }
+    require("dapui").setup()
+
+    -- Testing
+    use { "rcarriga/vim-ultest", requires = {"vim-test/vim-test"}, run = ":UpdateRemotePlugins" }
 
     -- Completion
     use 'hrsh7th/cmp-nvim-lsp'
