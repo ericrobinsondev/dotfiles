@@ -4,6 +4,7 @@
     ~/.tmux.conf: tmux.conf
     ~/.vimrc: vimrc
     ~/.zshrc: zshrc
+    ~/.p10k.zsh: config/p10k/.p10k.zsh
 
 - create:
     ~/.vim/undo

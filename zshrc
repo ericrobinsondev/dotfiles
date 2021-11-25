@@ -156,3 +156,5 @@ BASE16_SHELL="$HOME/.config/base16-shell/"
 gch() {
  git checkout “$(git branch —-all | fzf| tr -d ‘[:space:]’)”
 }
+
+source ~/powerlevel10k/powerlevel9k.zsh-theme
