@@ -1,4 +1,5 @@
 local o = vim.opt
+HOME = os.getenv('HOME')
 
 -- Appearance
 o.cmdheight = 1
@@ -19,7 +20,7 @@ o.swapfile = false
 
 -- Undo
 o.undofile = true
-o.undodir = '~/.vimundo/'
+o.undodir = HOME .. '/.vim/undo'
 
 -- Completion
 o.completeopt = 'menuone,noselect'
