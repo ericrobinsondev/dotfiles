@@ -17,6 +17,10 @@ o.backup = false
 o.writebackup = false
 o.swapfile = false
 
+-- Undo
+o.undofile = true
+o.undodir = '~/.vimundo/'
+
 -- Completion
 o.completeopt = 'menuone,noselect'
 o.pumblend = 0 -- Popup menu transparency
