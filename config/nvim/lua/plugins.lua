@@ -5,17 +5,22 @@ local fn = vim.fn
 local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
 
 if fn.empty(fn.glob(install_path)) > 0 then
-  fn.system({'git', 'clone', 'https://github.com/wbthomason/packer.nvim', install_path})
-  execute 'packadd packer.nvim'
+  packer_bootstrap = fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
 end
 
-vim.cmd('packadd packer.nvim')
 local packer = require'packer'
 local util = require'packer.util'
 packer.init({
   package_root = util.join_paths(vim.fn.stdpath('data'), 'site', 'pack')
 })
 
+-- Run PackerCompile everytime this file is saved
+vim.cmd([[
+  augroup packer_user_config
+    autocmd!
+    autocmd BufWritePost plugins.lua source <afile> | PackerCompile
+  augroup end
+]])
 --- startup and add/configure plugins
 packer.startup(function()
     local use = use
@@ -29,18 +34,6 @@ packer.startup(function()
 
     -- add missing colors to highlight groups that are missing
     use 'folke/lsp-colors.nvim'
-
-    -- rainbow brackets
-    use 'p00f/nvim-ts-rainbow'
-    require'nvim-treesitter.configs'.setup {
-      rainbow = {
-        enable = true,
-        extended_mode = true, -- Highlight also non-parentheses delimiters, boolean or table: lang -> boolean
-        max_file_lines = 1000, -- Do not enable for files with more than 1000 lines, int
-        colors = {}, -- table of hex strings
-        termcolors = {}, -- table of colour name strings
-      }
-    }
 
     -- Dim inactive windows
     use 'sunjon/shade.nvim'
@@ -73,11 +66,21 @@ packer.startup(function()
     use 'nvim-treesitter/nvim-treesitter'
     local configs = require'nvim-treesitter.configs'
     configs.setup {
+      context_commentstring = {
+        enable = true
+      },
       ensure_installed = "maintained",
       highlight = {
         enable = true,
+      },
+      rainbow = {
+        enable = true,
+        extended_mode = true, -- Highlight also non-parentheses delimiters, boolean or table: lang -> boolean
       }
+
     }
+
+    use 'JoosepAlviste/nvim-ts-context-commentstring'
 
     use {'sheerun/vim-polyglot'}
 
@@ -102,9 +105,6 @@ packer.startup(function()
         lsp_blacklist = {},
     }
 
-
-    -- code formatting
-    use {'prettier/vim-prettier', run = 'yarn install' }
 
     -- icons
     use {'kyazdani42/nvim-web-devicons'}
@@ -293,8 +293,6 @@ packer.startup(function()
     local default_config = {
       on_attach = custom_on_attach,
     }
-    -- setup language servers here
-    lspconfig.tsserver.setup(default_config)
 
     -- Customize LSP error display
     vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
@@ -305,5 +303,28 @@ packer.startup(function()
         update_in_insert = true,
       }
     )
+    -- code formatting
+    use({ "jose-elias-alvarez/null-ls.nvim",
+        after = "neovim/nvim-lspconfig",
+        requires = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"},
+        config = function()
+          require("null-ls").config({
+              sources = {
+                null_ls.builtins.diagnostics.eslintwith({
+                  prefer_local = "node_modules/.bin",
+                }),
+                null_ls.builtins.code_actions.eslint,
+                null_ls.builtins.formatting.prettier,
+                null_ls.builtins.code_actions.gitsigns,
+                null_ls.builtins.formatting.isort,
+                null_ls.builtins.formatting.black,
+                null_ls.builtins.diagnostics.flake8,
+              }
+          })
+          lspconfig['null-ls'].setup({})
+        end
+      })
+
   end
+
 )
