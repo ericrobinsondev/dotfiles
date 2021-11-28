@@ -1,5 +1,4 @@
 local vim = vim
-local execute = vim.api.nvim_command
 local fn = vim.fn
 
 local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
@@ -22,7 +21,7 @@ vim.cmd([[
   augroup end
 ]])
 --- startup and add/configure plugins
-packer.startup(function()
+packer.startup(function(use)
     local use = use
 
     -- Dashboard startup
@@ -62,6 +61,9 @@ packer.startup(function()
       }
     }
 
+    -- Comments
+    use 'tpope/vim-commentary'
+
     -- syntax highlighting
     use 'nvim-treesitter/nvim-treesitter'
     local configs = require'nvim-treesitter.configs'
@@ -83,6 +85,9 @@ packer.startup(function()
     use 'JoosepAlviste/nvim-ts-context-commentstring'
 
     use {'sheerun/vim-polyglot'}
+
+    -- Lua dev
+    use { "folke/lua-dev.nvim", event = "VimEnter" }
 
     -- Tagbar-like plugin
     use {'simrat39/symbols-outline.nvim'}
@@ -203,7 +208,7 @@ packer.startup(function()
       }
     }
 
-    -- fzf-native 
+    -- fzf-native
     require('telescope').load_extension('fzf')
 
     use 'jremmen/vim-ripgrep'
@@ -219,6 +224,9 @@ packer.startup(function()
       end
     }
 
+
+    -- Key hints
+    use 'folke/which-key.nvim'
 
     -- File Explorer
     use 'kyazdani42/nvim-tree.lua'
@@ -257,7 +265,7 @@ packer.startup(function()
     use 'hrsh7th/cmp-buffer'
     use 'hrsh7th/cmp-path'
     use 'hrsh7th/cmp-cmdline'
-    use 'hrsh7th/nvim-cmp' 
+    use 'hrsh7th/nvim-cmp'
     use 'onsails/lspkind-nvim'
     require('plugins.cmp')
 
@@ -281,49 +289,60 @@ packer.startup(function()
 
     -- LSP
     use 'neovim/nvim-lspconfig'
-    use 'nvim-lua/completion-nvim'
     use 'williamboman/nvim-lsp-installer'
+    local lsp_installer = require("nvim-lsp-installer")
+    -- local lsp_providers = { tsserver = true, pyright = true, sumneko_lua = true }
 
-    local lspconfig = require'lspconfig'
-    local completion = require'completion'
-    local function custom_on_attach(client)
-      print('Attaching to ' .. client.name)
-      completion.on_attach(client)
-    end
-    local default_config = {
-      on_attach = custom_on_attach,
-    }
+    -- Register a handler that will be called for all installed servers.
+    lsp_installer.on_server_ready(function(server)
+        local opts = {}
+        -- (optional) Customize the options passed to the server
+        if server.name == "sumneko_lua" then
+           opts = {
+             settings = {
+               Lua = {
+                 diagnostics = {
+                   globals = { 'vim', 'use' },
+                   disable = { 'lowercase-global' }
+                 },
+               },
+             },
+           }
+        end
+          server:setup(opts)
+        -- end
+      end)
 
     -- Customize LSP error display
     vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
       vim.lsp.diagnostic.on_publish_diagnostics, {
         underline = true,
-        virtual_text = false,
+        virtual_text = true,
         signs = true,
         update_in_insert = true,
       }
     )
     -- code formatting
     use({ "jose-elias-alvarez/null-ls.nvim",
-        after = "neovim/nvim-lspconfig",
-        requires = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"},
-        config = function()
-          require("null-ls").config({
-              sources = {
-                null_ls.builtins.diagnostics.eslintwith({
-                  prefer_local = "node_modules/.bin",
-                }),
-                null_ls.builtins.code_actions.eslint,
-                null_ls.builtins.formatting.prettier,
-                null_ls.builtins.code_actions.gitsigns,
-                null_ls.builtins.formatting.isort,
-                null_ls.builtins.formatting.black,
-                null_ls.builtins.diagnostics.flake8,
-              }
-          })
-          lspconfig['null-ls'].setup({})
-        end
+    after = "nvim-lspconfig",
+    requires = {"nvim-lua/plenary.nvim", "nvim-lspconfig"},
+    config = function()
+      require("null-ls").config({
+          sources = {
+            require("null-ls").builtins.diagnostics.eslintwith({
+              prefer_local = "node_modules/.bin",
+            }),
+            require("null-ls").builtins.code_actions.eslint,
+            require("null-ls").builtins.formatting.prettier,
+            require("null-ls").builtins.code_actions.gitsigns,
+            require("null-ls").builtins.formatting.isort,
+            require("null-ls").builtins.formatting.black,
+            require("null-ls").builtins.diagnostics.flake8,
+          }
       })
+      require("lspconfig")['null-ls'].setup({})
+    end
+  })
 
   end
 
