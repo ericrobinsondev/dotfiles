@@ -11,3 +11,8 @@
     ~/.vim/plugged
     ~/.fzf
     ~/.tags
+
+- brew:
+  - bat
+  - tree
+  - neovim
